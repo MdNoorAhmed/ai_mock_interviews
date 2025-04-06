@@ -15,6 +15,10 @@ import FormField from "./FormField";
 import { userAgent } from "next/server";
 import { useRouter } from "next/navigation";
 import { log } from "console";
+import { create } from "domain";
+import { auth } from "@/firebase/client";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { SignIn, signUp } from "@/lib/actions/auth.action";
 
 
 const authFormSchema = (type: FormType) => {
@@ -42,15 +46,46 @@ const AuthForm = ( {type} : {type : FormType}  ) => {
       })
      
       // 2. Define a submit handler.
-      function onSubmit(values: z.infer<typeof formSchema>) {
+      async function onSubmit(values: z.infer<typeof formSchema>) {
        try {
             if (type === 'sign-up'){
+                const { name, email, password } = values;
+
+                const userCredentials = await createUserWithEmailAndPassword(auth as any, email, password);
+                const result = await signUp({
+                    uid: userCredentials.user.uid,
+                    name: name!,
+                    email,
+                    password,
+                })
+
+                if(!result?.success) {
+                    toast.error(result?.message);
+                    return;
+                }
+
                 toast.success('Account created successfully. Please sign in');
                 router.push('/sign-in')
         
             } else {
+                const { email, password} = values;
+
+                const userCredentials = await signInWithEmailAndPassword(auth as any, email, password);
+
+                const idToken = await userCredentials.user.getIdToken();
+
+                if(!idToken) {
+                    toast.error('Sign in failed')
+                    return;
+                }
+
+                await SignIn({
+                    email, idToken
+                })
+
                 toast.success('Sign in successfully.');
-                router.push('/')            }
+                router.push('/')  
+                      }
        } catch (error) {
         console.log(error);
         toast.error(`There was an error : ${error}`)
@@ -59,7 +94,6 @@ const AuthForm = ( {type} : {type : FormType}  ) => {
       }
 
       const isSignIn = type === 'sign-in';
-
 
   return (
     <div className="card-border lg:min-w-[566px]">
