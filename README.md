@@ -2,7 +2,7 @@
 
 AI-powered mock interview platform to help users practice job interviews in a realistic and voice-based environment. Built with **Next.js**, **Firebase**, and **Vapi.ai** — it delivers instant feedback based on your spoken answers.
 
-> **Live Site**: [ai-mock-interviews-noorahmed.vercel.app](https://ai-mock-interviews-noorahmed.vercel.app)
+> **Live Site**: [ai-mock-interviews-noorahmed.vercel.app](https://ai-mock-interviews-noorahmed.vercel.app/sign-in)
 
 ---
 
